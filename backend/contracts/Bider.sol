@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.1;
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+// import "@openzeppelin/contracts/access/Ownable.sol";
 import "./TenderOwner.sol";
 
-contract Bider is Ownable, TenderPoster {
+contract Bider is TenderPoster {
     using SafeMath for uint;
     //include Rejected Status
 
@@ -15,7 +15,7 @@ contract Bider is Ownable, TenderPoster {
     }
 
     struct biderDetails {
-        address payable bidowner;
+        address bidowner;
         string companyName;
         string contact;
         string goodsDealsWith;
@@ -53,7 +53,7 @@ contract Bider is Ownable, TenderPoster {
         );
         uint _bidsindex = bidstenderlength;
         bidItems[_tenderIndex] = biderDetails(
-            payable(msg.sender),
+            msg.sender,
             _companyName,
             _contact,
             _goodsDealsWith,
@@ -79,25 +79,24 @@ contract Bider is Ownable, TenderPoster {
     }
 
     //function to return only bider details
-    function viewBiderTenders()
-        public
-        view
-        returns (biderDetails[] memory tenders)
-    {
+    function viewBiderTenders() public view returns (biderDetails[] memory) {
         uint tenderlength = 0;
-        for (uint i = 0; i < bidstenderlength; i++) {
+        uint allbidertenderlength = bidstenderlength;
+        for (uint i = 0; i < allbidertenderlength; i++) {
             if (bidItems[i].bidowner == msg.sender) {
-                tenderlength++;
+                tenderlength += 1;
             }
         }
-        tenders = new biderDetails[](tenderlength);
+        biderDetails[] memory tenders = new biderDetails[](tenderlength);
         uint j = 0;
-        for (uint i = 0; i < tenderIndex; i++) {
+        for (uint i = 0; i < allbidertenderlength; i++) {
             if (bidItems[i].bidowner == msg.sender) {
-                tenders[j] = bidItems[i];
-                j++;
+                biderDetails storage mybids = bidItems[i];
+                tenders[j] = mybids;
+                j += 1;
             }
         }
+        return tenders;
     }
 
     function getTotalBindsLength() public view returns (uint) {
@@ -109,7 +108,7 @@ contract Bider is Ownable, TenderPoster {
         uint _tenderbidsIndex
     )
         public
-        onlyOwner
+        onlyOwner(_tenderbidsIndex)
         returns (address, string memory, string memory, string memory)
     {
         require(
@@ -181,7 +180,7 @@ contract Bider is Ownable, TenderPoster {
         uint _tenderbidsIndex
     )
         public
-        onlyOwner
+        onlyOwner(_tenderbidsIndex)
         returns (address, string memory, string memory, string memory)
     {
         require(
